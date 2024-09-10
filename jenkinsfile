@@ -8,23 +8,38 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Pull code from GitHub repository
-                git 'https://github.com/vishnuvarman97/terraform-s3-bucket.git'
+                script {
+                    // Pull code from GitHub repository
+                    checkout([$class: 'GitSCM', 
+                              branches: [[name: '*/main']], // Replace 'main' with your branch name if different
+                              userRemoteConfigs: [[url: 'https://github.com/vishnuvarman97/terraform-s3-bucket.git']]
+                    ])
+                }
             }
         }
         stage('Terraform Init') {
             steps {
                 script {
-                    // Initialize Terraform
-                    sh 'terraform init'
+                    try {
+                        // Initialize Terraform
+                        sh 'terraform init'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
         stage('Terraform Plan') {
             steps {
                 script {
-                    // Generate Terraform execution plan
-                    sh 'terraform plan'
+                    try {
+                        // Generate Terraform execution plan
+                        sh 'terraform plan'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -32,8 +47,13 @@ pipeline {
             steps {
                 input message: 'Approve Terraform Apply?', ok: 'Apply'
                 script {
-                    // Apply Terraform changes
-                    sh 'terraform apply -auto-approve'
+                    try {
+                        // Apply Terraform changes
+                        sh 'terraform apply -auto-approve'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -44,6 +64,13 @@ pipeline {
             // Clean workspace after build
             cleanWs()
         }
+        success {
+            // Log success message
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            // Log failure message
+            echo 'Pipeline failed!'
+        }
     }
 }
-
