@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'aws' } // Specify the label of your AWS agent
 
     environment {
         AWS_DEFAULT_REGION = 'us-east-2' // Set your AWS region here
@@ -17,14 +17,22 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    sh 'terraform init'
+                    try {
+                        sh 'terraform init'
+                    } catch (Exception e) {
+                        error "Terraform Init failed: ${e.message}"
+                    }
                 }
             }
         }
         stage('Terraform Plan') {
             steps {
                 script {
-                    sh 'terraform plan'
+                    try {
+                        sh 'terraform plan'
+                    } catch (Exception e) {
+                        error "Terraform Plan failed: ${e.message}"
+                    }
                 }
             }
         }
@@ -32,7 +40,11 @@ pipeline {
             steps {
                 input message: 'Approve Terraform Apply?', ok: 'Apply'
                 script {
-                    sh 'terraform apply -auto-approve'
+                    try {
+                        sh 'terraform apply -auto-approve'
+                    } catch (Exception e) {
+                        error "Terraform Apply failed: ${e.message}"
+                    }
                 }
             }
         }
