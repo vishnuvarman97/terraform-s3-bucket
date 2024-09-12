@@ -8,38 +8,23 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    // Pull code from GitHub repository
-                    checkout([$class: 'GitSCM', 
-                              branches: [[name: '*/main']], // Replace 'main' with your branch name if different
-                              userRemoteConfigs: [[url: 'https://github.com/vishnuvarman97/terraform-s3-bucket.git']]
-                    ])
-                }
+                checkout([$class: 'GitSCM', 
+                          branches: [[name: '*/main']], // Ensure this matches your branch name
+                          userRemoteConfigs: [[url: 'https://github.com/vishnuvarman97/terraform-s3-bucket.git']]
+                ])
             }
         }
         stage('Terraform Init') {
             steps {
                 script {
-                    try {
-                        // Initialize Terraform
-                        sh 'terraform init'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
+                    sh 'terraform init'
                 }
             }
         }
         stage('Terraform Plan') {
             steps {
                 script {
-                    try {
-                        // Generate Terraform execution plan
-                        sh 'terraform plan'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
+                    sh 'terraform plan'
                 }
             }
         }
@@ -47,13 +32,7 @@ pipeline {
             steps {
                 input message: 'Approve Terraform Apply?', ok: 'Apply'
                 script {
-                    try {
-                        // Apply Terraform changes
-                        sh 'terraform apply -auto-approve'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
@@ -61,15 +40,12 @@ pipeline {
     
     post {
         always {
-            // Clean workspace after build
-            cleanWs()
+            cleanWs() // Clean up workspace
         }
         success {
-            // Log success message
             echo 'Pipeline succeeded!'
         }
         failure {
-            // Log failure message
             echo 'Pipeline failed!'
         }
     }
