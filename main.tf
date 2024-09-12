@@ -1,10 +1,14 @@
-# Specify the provider
 provider "aws" {
-  region = "us-east-2" # Set your AWS region here
+  region = "eu-west-2"
 }
 
-# Create an S3 bucket
-resource "aws_s3_bucket" "my_bucket" {
-  bucket = "my-unique-bucket-name-123456" # Change to a unique bucket name
-  # Add any other required configurations here
+resource "aws_s3_bucket" "demo_bucket" {
+  bucket = "my-demo-bucket-unique-name"
+  
+  # Optional settings
+  acl    = "private"  # or "public-read", etc.
+  
+  tags = {
+    Name = "DemoBucket"
+  }
 }
