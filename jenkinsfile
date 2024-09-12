@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'aws' } // Specify the label of your AWS agent
+    agent any // This will use any available agent, including the Jenkins master if configured
 
     environment {
         AWS_DEFAULT_REGION = 'us-east-2' // Set your AWS region here
